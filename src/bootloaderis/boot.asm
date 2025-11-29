@@ -92,8 +92,9 @@ disk_retry:
 	inc cl
 	xor dx, dx
 	div word [bdb_pusiu_sk] ; divide by the number of heads
-	shl ax, 6
-	or cx, ax
+	mov ch, al
+	shl ax, 8
+	or cl, al
 	shl dx, 8
 	mov ah, 2
 	mov al, byte [bp+18]
@@ -151,13 +152,13 @@ match:
 	mov bp, kernel
 clstrld_loop:
 	; 1.LOAD DATA:
-	push bp
 	mov di, ax
 	; quick lba calculation
 	sub ax, 2
 	shl ax, 1
 	add ax, 33 ; 33 base data for FAT, reserved and root dir
 	;
+	push bp
 	push ax
 	push 2
 	call disk_read
@@ -166,8 +167,9 @@ clstrld_loop:
 	mov si, FAT_tables
 	mov ax, di
 	mov bx, di
-	mov cx, 2
-	div cx
+	mov dx, ax
+	and dx, 1
+	shr ax, 1
 	add ax, bx
 	cmp dx, 1
 	jz odd
@@ -183,6 +185,13 @@ done_calc:
 	cmp ax, 0xfff
 	jz end_boot
 	add bp, 1024
+	jc overflow
+	jmp clstrld_loop
+
+overflow:
+	mov dx, es
+	add dx, 512
+	mov es, dx
 	jmp clstrld_loop
 
 end_boot:

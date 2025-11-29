@@ -1,7 +1,7 @@
 ENTRY(_start)
 
 SECTIONS {
-    . = 0xb15a;
+    . = 0xb0cd;
     .text : {
         *(.text)
     }
@@ -15,4 +15,7 @@ SECTIONS {
         *(.bss)
         *(COMMON)
     }
+    .pgtables : ALIGN(4096) {
+        *(.pgtables)
+   	}
 }
