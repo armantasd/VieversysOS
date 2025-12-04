@@ -1,9 +1,9 @@
 ASM=nasm
-CMPL=i686-elf-gcc
-LD=i686-elf-ld
+CMPL=gcc
+LD=ld
 SRC_DIR=src
 BUILD_DIR=build
-OCPY=i686-elf-objcopy
+OCPY=objcopy
 
 .PHONY: all floppy_image kernelis bootloaderis clean always
 
@@ -26,12 +26,12 @@ kernelis: $(BUILD_DIR)/kernelis.bin
 $(BUILD_DIR)/kernelis.bin: always
 	$(ASM) $(SRC_DIR)/kernelis/bootstrap.asm -fbin -o $(BUILD_DIR)/bootstrap.bin
 	# library compiling
-	$(ASM) -felf32 $(SRC_DIR)/kernelis/main.asm -o $(BUILD_DIR)/main.o
-	$(CMPL) -ffreestanding -m32 -nostdlib -c $(SRC_DIR)/kernelis/stdio.c -o $(BUILD_DIR)/stdio.o
+	$(ASM) -felf64 $(SRC_DIR)/kernelis/main.asm -o $(BUILD_DIR)/main.o
+	$(CMPL) -ffreestanding -nostdlib -c -fno-stack-protector -fno-pic $(SRC_DIR)/kernelis/stdio.c -o $(BUILD_DIR)/stdio.o
 	#
-	$(CMPL) -ffreestanding -m32 -nostdlib -c $(SRC_DIR)/kernelis/kernelis.c -o $(BUILD_DIR)/kernelis.o
+	$(CMPL) -ffreestanding -nostdlib -c -fno-stack-protector -fno-pic $(SRC_DIR)/kernelis/kernelis.c -o $(BUILD_DIR)/kernelis.o
 	# link libraries
-	$(LD) -T $(SRC_DIR)/link.ld -o $(BUILD_DIR)/kernelis.elf $(BUILD_DIR)/main.o  $(BUILD_DIR)/stdio.o $(BUILD_DIR)/kernelis.o
+	$(LD) -nostdlib -T $(SRC_DIR)/link.ld  $(BUILD_DIR)/main.o  $(BUILD_DIR)/stdio.o $(BUILD_DIR)/kernelis.o -o $(BUILD_DIR)/kernelis.elf
 	$(OCPY) -O binary $(BUILD_DIR)/kernelis.elf $(BUILD_DIR)/kernelis_body.bin
 	cat $(BUILD_DIR)/bootstrap.bin $(BUILD_DIR)/kernelis_body.bin > $(BUILD_DIR)/kernelis.bin
 always:

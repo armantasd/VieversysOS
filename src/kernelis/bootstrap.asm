@@ -40,7 +40,6 @@ gdt_start:
 	db 0x89
 	db 0x00
 	db 0
-	
 gdt_end:
 gdt_descriptor:
 	dw gdt_end - gdt_start - 1
@@ -59,7 +58,7 @@ pargindine:
 	cli
 	lgdt [gdt_descriptor]
 	xor ax, ax
-	mov bx, 0x0
+	mov bx, 0
 	mov fs, bx
 	mov gs, bx
 	mov ds, bx

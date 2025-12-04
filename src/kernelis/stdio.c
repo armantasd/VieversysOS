@@ -49,28 +49,23 @@ void print(char* buffer, void* argv)
 		if (buffer[i] == '%')
 		{
 			i++;
-			switch (buffer[i])
+			uint8_t* ptr = (uint8_t*) argv;
+			int integer = *(int*)(ptr + ai);
+			static char ibuffer[11];
+			itoa(integer, ibuffer);
+			uint8_t si = 0;
+			while(ibuffer[si] == 0)
 			{
-				case 'i':
-					uint8_t* ptr = (uint8_t*) argv;
-					int integer = *(int*)(ptr + ai);
-					static char ibuffer[11];
-					itoa(integer, ibuffer);
-					uint8_t si = 0;
-					while(ibuffer[si] == 0)
-					{
-						si++;
-					}
-					while(si < 11)
-					{
-						prtchr(ibuffer[si], i + VGA_buffer_index - 1);
-						si++;
-					 	i++;
-					}
-					ai += 4;
-					i--;
-					break;
+				si++;
 			}
+			while(si < 11)
+			{
+				prtchr(ibuffer[si], i + VGA_buffer_index - 1);
+				si++;
+			 	i++;
+			}
+			ai += sizeof(int);
+			i--;
 		}
 		prtchr(buffer[i], i + VGA_buffer_index);
 		i++;
