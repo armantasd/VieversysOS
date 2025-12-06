@@ -22,10 +22,6 @@ _start:
 	mov eax, cr0
 	or eax, (1 << 31)
 	mov cr0, eax
-
-	mov eax, 0
-	mov ebx, 2
-	add eax, ebx
 	
 	jmp 0x08:long_mode
 
@@ -38,11 +34,13 @@ long_mode:
 	mov fs, ax
 	mov gs, ax
 
+	; TO DO: fix it
+
 	; page higher half at address  0xFFFFFFFFFFE00000 (last page dir)
 	; PDPT
-	mov qword [hhpdpt], 0x105003
+	mov qword [hhpdpt + 4088], 0x105003 ; last pdpt
 	; PD
-	mov qword [hhpdpt + 4096], 0x106003
+	mov qword [hhpdpt + 8184], 0x106003 ; last pd
 	mov rax, 0xb003
 	mov rbx, 0
 page_loop:
@@ -53,10 +51,22 @@ page_loop:
 	inc rbx
 	jmp page_loop
 end_page_loop:
-	ret
 
-	call kernel_main + 0xFFFFFFFFFFE00000
-	call kernel_main
+	; map stack space
+	mov rax, 0x0003
+	mov rbx, 0
+spage_loop:
+	cmp rbx, 7 ; six seven pages for the stack
+	je send_page_loop
+	mov qword [hhpt + rbx * 8 + 4040], rax
+	add rax, 4096
+	inc rbx
+	jmp spage_loop
+send_page_loop:
+	
+	mov rsp, 0xFFFFFFFFFFFFFFFF
+
+	call vir_kernel
     hlt
 	jmp $
 
@@ -81,7 +91,6 @@ init_page_tables:
 	mov dword [pml4 + 8192], ebx
 	; identity map kernel
 	mov dword [pt + 0xb * 8], 0xb003
-	mov dword [pt + 0xc * 8], 0xc003
 	; map page tables
 	mov dword [pt + 0x100 * 8], 0x100003
 	mov dword [pt + 0x101 * 8], 0x101003
@@ -155,3 +164,4 @@ pml4 equ 0x100000
 pt equ 0x103000
 hhpdpt equ 0x104000
 hhpt equ 0x106000
+vir_kernel equ kernel_main + 0xFFFFFFFFFFE00000 - 0xb000

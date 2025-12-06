@@ -2,7 +2,7 @@ ENTRY(_start)
 
 SECTIONS {
     . = 0xb0cd;
-    .text : {
+        .text : {
         *(.text)
     }
     .rodata : {
@@ -15,7 +15,4 @@ SECTIONS {
         *(.bss)
         *(COMMON)
     }
-    .pgtables : ALIGN(4096) {
-        *(.pgtables)
-   	}
 }
