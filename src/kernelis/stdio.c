@@ -7,7 +7,7 @@ static int VGA_buffer_index;
 
 void prtchr(char c, int index)
 {
-	char* VGA_BUFFER = (char*) 0xB8000;
+	char* VGA_BUFFER = (char*) 0xFFFFFFFFFFE95000 - 0xA0000 + 0xB8000;
 	VGA_BUFFER[index << 1] = c;
 }
 

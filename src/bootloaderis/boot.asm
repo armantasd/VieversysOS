@@ -49,6 +49,7 @@ end_print_loop:
 read_sector_chs:
     pusha
     mov ah, 0x02
+    mov dl, 0x80 ; for hardware testing on drives
     int 0x13
     jc .error
     popa

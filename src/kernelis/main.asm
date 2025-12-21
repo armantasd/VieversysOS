@@ -34,8 +34,6 @@ long_mode:
 	mov fs, ax
 	mov gs, ax
 
-	; TO DO: fix it
-
 	; page higher half at address  0xFFFFFFFFFFE00000 (last page dir)
 	; PDPT
 	mov qword [hhpdpt + 4088], 0x105003 ; last pdpt
@@ -65,6 +63,23 @@ spage_loop:
 send_page_loop:
 	
 	mov rsp, 0xFFFFFFFFFFFFFFFF
+	; map io space (A0000 is mapped to 0xFFFFFFFFFFE95000) (AD - expected page table index for VGA)
+	mov rax, 0xA0003
+	mov rbx, 0
+iopage_loop:
+	cmp rbx, 0x1f
+	je ioend_page_loop
+	mov qword [hhpt + 0x95 * 8 + rbx * 8], rax
+	add rax, 4096
+	inc rbx
+	jmp iopage_loop
+ioend_page_loop:
+
+	; map page tables
+	mov qword [hhpt + 0xb4 * 8], pml4 + 3 
+	mov qword [hhpt + 0xb5 * 8], hhpdpt + 3
+	mov qword [hhpt + 0xb6 * 8], hhpdpt + 4096 + 3 ; hhpd
+	mov qword [hhpt + 0xb7 * 8], hhpt + 3
 
 	call vir_kernel
     hlt
