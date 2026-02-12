@@ -125,7 +125,7 @@ sgdt_start:
 	dw 0xffff
 	dw 0
 	db 0
-	db 0x9c
+	db 0x9a
 	db 0xaf
 	db 0
 	; tss segment

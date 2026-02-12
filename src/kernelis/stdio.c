@@ -1,4 +1,4 @@
-typedef unsigned char uint8_t;
+#include<stdint.h>
 typedef unsigned char Bool;
 #define false 0
 #define true 1
@@ -73,5 +73,3 @@ void print(char* buffer, void* argv)
 	VGA_buffer_index += i;
 	return;
 }
-
-
