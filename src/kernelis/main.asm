@@ -6,6 +6,7 @@ section .text
 _start:
 	call init_page_tables
 
+	mov eax, sgdt_descriptor
 	lgdt [sgdt_descriptor]
 	
 	mov edx, cr4
@@ -106,6 +107,10 @@ init_page_tables:
 	mov dword [pml4 + 8192], ebx
 	; identity map kernel
 	mov dword [pt + 0xb * 8], 0xb003
+	mov dword [pt + 0xc * 8], 0xc003
+	mov dword [pt + 0xd * 8], 0xd003
+	mov dword [pt + 0xe * 8], 0xe003
+	mov dword [pt + 0xf * 8], 0xf003
 	; map page tables
 	mov dword [pt + 0x100 * 8], 0x100003
 	mov dword [pt + 0x101 * 8], 0x101003
@@ -140,7 +145,7 @@ sgdt_end:
 
 sgdt_descriptor:
 	dw sgdt_end - sgdt_start - 1
-	dd sgdt_start
+	dq sgdt_start
 
 tss:
 	times 148 db 0
@@ -179,4 +184,4 @@ pml4 equ 0x100000
 pt equ 0x103000
 hhpdpt equ 0x104000
 hhpt equ 0x106000
-vir_kernel equ kernel_main + 0xFFFFFFFFFFE00000 - 0xb000
+vir_kernel equ kernel_main + 0xFFFFFFFFFFE00000 - 0xb000 // + 0xFFFFFFFFFFDF5000

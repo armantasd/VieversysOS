@@ -10,6 +10,7 @@ section .data
 	netinszin: db "Neteisinga instrukcija."
 	tsszin: db "Neteisingas tss."
 	pslzin: db "Neteisingas puslapiavimas."
+	rezzin: db "Rezervuotas pertraukymas."
 section .text
 
 %macro popall 0
@@ -101,6 +102,41 @@ puslapiavimo_klaida:
 	popall
 	sti
 	iretq
+
+%macro rISR 1
+	global rISR%1
+	rISR%1:
+		cli
+		pushall
+		call pertraukymo_aptvarkymas
+		mov rdi, rezzin
+		mov rsi, 0
+		call print
+		popall
+		sti
+		iretq
+
+%endmacro
+
+rISR 1
+rISR 2
+rISR 3
+rISR 4
+rISR 5
+rISR 7
+rISR 8
+rISR 9
+rISR 11
+rISR 12
+rISR 13
+rISR 16
+rISR 17
+rISR 18
+rISR 19
+rISR 20
+rISR 21
+
+
 global laikmacio_pab_isr
 laikmacio_pab_isr:
 	cli
