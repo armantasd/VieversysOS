@@ -7,7 +7,7 @@ OCPY=objcopy
 
 .PHONY: all floppy_image kernelis bootloaderis clean always
 
-CVEL := -ffreestanding -nostdlib -c -fno-stack-protector -fno-pic
+CVEL := -ffreestanding -nostdlib -c -fno-stack-protector -fno-pic -m64 -mcmodel=kernel -mno-red-zone -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-exceptions
 	
 CFAILAI := $(shell find $(SRC_DIR)/kernelis -type f -name "*.c")
 OBIJEKTAI := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(CFAILAI))

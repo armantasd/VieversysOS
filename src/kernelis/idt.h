@@ -16,3 +16,4 @@ struct pertr_lent_ptr {
 }__attribute__((packed));
 
 void irasytiIDTirasus(struct pertr_irasas* irasas, uint64_t ISRadresas, uint8_t veliavos);
+void InicijuotiIDTirasus(struct pertr_irasas pertr_irasai[]);

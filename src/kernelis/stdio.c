@@ -41,7 +41,6 @@ void itoa(int a, char* string)
 
 void print(char* buffer, void* argv)
 {
-	buffer--;
 	int i = 0;
 	int ai = 0;
 	while (buffer[i] != '\0')
@@ -73,3 +72,4 @@ void print(char* buffer, void* argv)
 	VGA_buffer_index += i;
 	return;
 }
+

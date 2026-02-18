@@ -11,3 +11,9 @@ void irasyti_i_porta(uint16_t portas, uint8_t reiksme)
 {
 	asm volatile ("outb %1, %0" : : "dN" (portas), "a" (reiksme));
 }
+uint8_t skaityti_porta(uint16_t portas)
+{
+	uint8_t rezultatas;
+	asm volatile ("inb %1, %0" : "=a" (rezultatas) : "dN" (portas));
+	return rezultatas;
+}

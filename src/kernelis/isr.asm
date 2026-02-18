@@ -6,11 +6,13 @@ extern irasyti_i_porta
 
 section .data
 	nulis: db 0
-	dalklzin: db  "Dalybos klaida."
-	netinszin: db "Neteisinga instrukcija."
-	tsszin: db "Neteisingas tss."
-	pslzin: db "Neteisingas puslapiavimas."
-	rezzin: db "Rezervuotas pertraukymas."
+	dalklzin: db  "Dalybos klaida. ", 0x0
+	netinszin: db "Neteisinga instrukcija. ", 0x0
+	tsszin: db "Neteisingas tss. ", 0x0
+	pslzin: db "Neteisingas puslapiavimas. ", 0x0
+	rezzin: db "Rezervuotas pertraukymas. ", 0x0
+	pabzin: db "Sistema nebegali veikti toliau.", 0x0
+
 section .text
 
 %macro popall 0
@@ -49,6 +51,7 @@ push r15
 %endmacro
 
 pertraukymo_aptvarkymas:
+	
 	mov ax, 0
 	mov ds, ax
 	mov es, ax
@@ -65,8 +68,7 @@ dalybos_klaida:
 	mov rsi, nulis
 	call print
 	popall
-	sti
-	iretq
+	jmp pabaiga
 global neteisinga_ins
 neteisinga_ins:
 	cli
@@ -76,8 +78,7 @@ neteisinga_ins:
 	mov rsi, nulis
 	call print
 	popall
-	sti
-	iretq
+	jmp pabaiga
 global tss_klaida
 tss_klaida:
 	cli
@@ -100,8 +101,7 @@ puslapiavimo_klaida:
 	add rsi, 8
 	call print
 	popall
-	sti
-	iretq
+	jmp pabaiga
 
 %macro rISR 1
 	global rISR%1
@@ -162,3 +162,10 @@ klaviaturos_pertr_isr:
 	popall
 	sti
 	iretq
+
+pabaiga:
+	mov rdi, pabzin + 1
+	mov rsi, 0
+	call print
+	hlt
+	jmp $

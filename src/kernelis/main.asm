@@ -1,12 +1,10 @@
 [bits 32]
 global _start
 extern kernel_main
-section .text
-
+section .boottext
 _start:
 	call init_page_tables
 
-	mov eax, sgdt_descriptor
 	lgdt [sgdt_descriptor]
 	
 	mov edx, cr4
@@ -82,7 +80,7 @@ ioend_page_loop:
 	mov qword [hhpt + 0xb6 * 8], hhpdpt + 4096 + 3 ; hhpd
 	mov qword [hhpt + 0xb7 * 8], hhpt + 3
 
-	call vir_kernel
+	call kernel_main
     hlt
 	jmp $
 
@@ -122,7 +120,7 @@ init_page_tables:
 	mov dword [pt + 0x106 * 8], 0x106003
 	ret
 	
-section .data
+section .gdt
 sgdt_start:
 	; null descriptor
 	dq 0
@@ -184,4 +182,6 @@ pml4 equ 0x100000
 pt equ 0x103000
 hhpdpt equ 0x104000
 hhpt equ 0x106000
-vir_kernel equ kernel_main + 0xFFFFFFFFFFE00000 - 0xb000 // + 0xFFFFFFFFFFDF5000
+vir_kernel equ kernel_main + 0xFFFFFFFFFFDF5000 ; Magiskas puslapiavimo adresas
+
+
