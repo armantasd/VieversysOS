@@ -74,9 +74,8 @@ iopage_loop:
 	jmp iopage_loop
 ioend_page_loop:
 	; heap space
-
-	mov qword [hhpdpt + 8176], 0x200083
-	
+	mov qword [hhpdpt + 8176], 0x200083 // malloc
+	mov qword [hhpdpt + 8168], 0x400083 // palloc
 	; map page tables
 	mov qword [hhpt + 0xb4 * 8], pml4 + 3 
 	mov qword [hhpt + 0xb5 * 8], hhpdpt + 3

@@ -1,14 +1,8 @@
 #include<stdint.h>
-#define HEAP_PRAD 0xFFFFFFFFFFD00000
-#define HEAP_PAB 0xFFFFFFFFFFE00000
-#define NULL 0x0
+#include"stdlib.h"
 
-struct blokas{
-	struct blokas *praitas;
-	struct blokas *kitas;
-	int dydis;
-};
-typedef struct blokas blokas;
+static uint64_t p_bitmap[8];
+
 void irasyti_baitus(uint8_t* ptr, uint8_t skaicius, int baitu_sk)
 {
 	for (int i = 0; i < baitu_sk; i++)
@@ -72,4 +66,29 @@ void free(void* ptr)
 	blokas* kitas_b = blk->kitas;
 	praitas_b->kitas = kitas_b;
 	kitas_b->praitas = praitas_b;
+}
+void InicijuotiPAlloc()
+{
+	for (int i = 0; i < 8; i++)
+	{
+		p_bitmap[i] = 0;
+	}
+}
+p_lentele* palloc()
+{
+	for (int i = 0; i < 512; i++)
+	{
+		long int kauke = 1 << (i % 64);
+		if (!(p_bitmap[i >> 6] & kauke))
+		{
+			p_bitmap[i >> 6] |=kauke;
+			return (p_lentele*) PHEAP_PRAD + i * 4096;
+		}
+	}
+}
+void pfree(p_lentele* ptr)
+{
+	int i = ((uint64_t) ptr - PHEAP_PRAD) / 4096;
+	long int kauke = 1 << (i % 64);
+	p_bitmap[i >> 6] &= ~kauke;
 }
