@@ -13,6 +13,7 @@ void kernel_main()
 	print("Labas");
 	print("%r", '\b');
 	InicijuotiAlloc();
+	InicijuotiPAlloc();
 	struct pertr_lent_ptr pertraukimai;
 	struct pertr_irasas *pertr_irasai = malloc(sizeof(struct pertr_irasas) * 256);
 	if (pertr_irasai == NULL)
@@ -34,6 +35,9 @@ void kernel_main()
 		print("%s\n", skaiciai[i]);
 	}
 	free(skaiciai);
+	p_lentele *nauja_lent = palloc();
+	nauja_lent->irasas[0] = 2342;
+	print("%s", nauja_lent->irasas[0]);
 	asm volatile ("lidt %0\n" "sti\n" : : "m" (pertraukimai) : "memory");
 	//Inicijuoti_Laikrodi(100);
 	return;

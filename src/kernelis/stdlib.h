@@ -28,3 +28,4 @@ void free(void* ptr);
 void InicijuotiAlloc();
 p_lentele* palloc();
 void pfree(p_lentele* ptr);
+void InicijuotiPAlloc();
