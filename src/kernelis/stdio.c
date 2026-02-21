@@ -151,3 +151,6 @@ void Perkrauti_zymekli(int zymeklio_pos)
 	irasyti_i_porta(0x3d4, 0x0e);
 	irasyti_i_porta(0x3d5, (uint8_t)(zymeklio_pos >> 8) & 0xff);
 }
+
+
+

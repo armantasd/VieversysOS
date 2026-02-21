@@ -8,7 +8,7 @@ _start:
 	lgdt [sgdt_descriptor]
 	
 	mov edx, cr4
-	or  edx, (1 << 5)
+	or  edx, (1 << 5 | 1 << 4)
 	mov cr4, edx
 	mov eax, 0
 	mov ecx, 0xC0000080
@@ -73,13 +73,15 @@ iopage_loop:
 	inc rbx
 	jmp iopage_loop
 ioend_page_loop:
+	; heap space
 
+	mov qword [hhpdpt + 8176], 0x200083
+	
 	; map page tables
 	mov qword [hhpt + 0xb4 * 8], pml4 + 3 
 	mov qword [hhpt + 0xb5 * 8], hhpdpt + 3
 	mov qword [hhpt + 0xb6 * 8], hhpdpt + 4096 + 3 ; hhpd
 	mov qword [hhpt + 0xb7 * 8], hhpt + 3
-
 	call kernel_main
     hlt
 	jmp $

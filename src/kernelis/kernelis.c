@@ -12,12 +12,28 @@ void kernel_main()
 {
 	print("Labas");
 	print("%r", '\b');
+	InicijuotiAlloc();
 	struct pertr_lent_ptr pertraukimai;
-	struct pertr_irasas pertr_irasai[256];
+	struct pertr_irasas *pertr_irasai = malloc(sizeof(struct pertr_irasas) * 256);
+	if (pertr_irasai == NULL)
+	{
+		print("Nepavyko priskirti vietos pertraukymams.");
+		return;
+	}
 	InicijuotiIDTirasus(pertr_irasai);
 	pertraukimai.limitas = sizeof(struct pertr_irasas) * 256 - 1;
-	pertraukimai.adresas = (uint64_t) &pertr_irasai;
-		
+	pertraukimai.adresas = (uint64_t) pertr_irasai;
+
+	int* skaiciai = malloc(20);
+	for (int i = 0; i < 20; i++)
+	{
+		skaiciai[i] = i;
+	}
+	for (int i = 0; i < 20; i++)
+	{
+		print("%s\n", skaiciai[i]);
+	}
+	free(skaiciai);
 	asm volatile ("lidt %0\n" "sti\n" : : "m" (pertraukimai) : "memory");
 	//Inicijuoti_Laikrodi(100);
 	return;
