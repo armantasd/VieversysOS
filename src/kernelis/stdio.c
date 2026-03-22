@@ -1,9 +1,8 @@
 #include<stdint.h>
 #include<stdarg.h>
+#include<stdbool.h>
 #include"stdlib.h"
-typedef unsigned char Bool;
-#define false 0
-#define true 1
+#include"vektoriai.h"
 
 static int VGA_buffer_indeksas;
 
@@ -22,32 +21,61 @@ void prtchr(char c, int index)
 	Perkrauti_zymekli(zymeklio_pos);
 }
 
-void itoa(int a, char* string)
+vektorius* itoa(int a)
 {
-	char letter;
-	Bool is_signed = false;
-	uint8_t index = 0;
-	if (a > 2147483647)
+	vektorius* vkt = Vektorius(1);
+	rezervuoti(vkt, 11);
+	bool zenklas = false;
+	if (a < 0)
 	{
-		is_signed = true;
-		a--;
-		a = ~a;
+		zenklas = true;
+		a *= -1;
 	}
-	letter = (a % 10) + '0';
-	a /= 10;
-	string[10] = letter;
-	while (a != 0)
+	while(true)
 	{
-		index++;
-		letter = (a % 10) + '0';
+		uint8_t raide = '0' + (a % 10);
+		push_back(vkt, &raide);
 		a /= 10;
-		string[10 - index] = letter;
+		if (a == 0)
+		{
+			break;
+		}
 	}
-	index++;
-	if(is_signed)
+	if (zenklas)
 	{
-		string[10 - index] = '-';
+		char temp = '-';
+		push_back(vkt, &temp);
 	}
+	return vkt;
+}
+
+vektorius* itoh(uint64_t a)
+{
+	vektorius* vkt = Vektorius(1);
+	rezervuoti(vkt, 19);
+	while(true)
+	{
+		char raide = a % 16;
+		if (raide < 9)
+		{
+			raide += '0';
+		}
+		else
+		{
+			raide += 'a' - 10;
+		}
+		push_back(vkt, &raide);
+		a /= 16;
+		if (a == 0)
+		{
+			break;
+		}
+	}
+	char temp = 'x';
+	push_back(vkt, &temp);
+	temp = '0';
+	push_back(vkt, &temp);
+	return vkt;
 }
 
 void print(char* tekstas, ...)
@@ -96,14 +124,28 @@ void print(char* tekstas, ...)
 					}
 					break;
 				case 's':
-					char skaicius[11];
-					itoa(va_arg(argumentai, int), skaicius);
-					for(int j = 0; j < 11; j++)
+					vektorius* vkt = itoa(va_arg(argumentai, int));
+					char* reiksmes = vkt->reiksmes;
+					int ilgis = vkt->elementu_sk;
+					for(int j = ilgis - 1; j >= 0; j--)
 					{
-						prtchr(skaicius[j], VGA_buffer_indeksas);
+						prtchr(reiksmes[j], VGA_buffer_indeksas);
 						VGA_buffer_indeksas++;
 					}
 					i += 2;
+					atlaisvinti_vkt(vkt);
+					break;
+				case 'p':
+					vkt = itoh(va_arg(argumentai, int));
+					reiksmes = vkt->reiksmes;
+					ilgis = vkt->elementu_sk;
+					for(int j = ilgis - 1; j >= 0; j--)
+					{
+						prtchr(reiksmes[j], VGA_buffer_indeksas);
+						VGA_buffer_indeksas++;
+					}
+					i += 2;
+					atlaisvinti_vkt(vkt);
 					break;
 			}
 		}

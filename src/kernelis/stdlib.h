@@ -2,20 +2,25 @@
 #define NULL 0x0
 
 #define HEAP_PRAD 0xFFFFFFFFFFD00000
-#define HEAP_PAB 0xFFFFFFFFFFE00000
+#define HEAP_PAB 0xFFFFFFFFFFDFFFEC
 #define PHEAP_PRAD 0xFFFFFFFFFFC00000
 #define PHEAP_PAB 0xFFFFFFFFFFD00000
-
+#define PUSL_LENT 0xFFFFFFFFFFEB4000
+#define RAMDISK 0xFFFFFFFFFFC00000
 struct p_lentele {
 	uint64_t irasas[512];
 }__attribute__((packed));
 
-struct blokas{
+struct blokas {
 	struct blokas *praitas;
 	struct blokas *kitas;
 	int dydis;
 }__attribute__((packed));
 
+typedef struct {
+	void* pradzia;
+	void* galas;
+} vblokas;
 
 typedef struct blokas blokas;
 typedef struct p_lentele p_lentele;
@@ -29,3 +34,7 @@ void InicijuotiAlloc();
 p_lentele* palloc();
 void pfree(p_lentele* ptr);
 void InicijuotiPAlloc();
+void* realloc(void* ptr, int naujas_dydis);
+void* valloc(unsigned int puslapiu_sk);
+void vfree(void* ptr);
+void InicijuotiVAlloc(unsigned int puslapiu_sk);

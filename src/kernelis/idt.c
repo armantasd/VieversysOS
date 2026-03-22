@@ -77,5 +77,4 @@ void InicijuotiIDTirasus(struct pertr_irasas pertr_irasai[])
 	irasytiIDTirasus(&pertr_irasai[21], (uint64_t) rISR21, 0b11101110);
 	irasytiIDTirasus(&pertr_irasai[32], (uint64_t) laikmacio_pab_isr, 0b10001110);
 	irasytiIDTirasus(&pertr_irasai[33], (uint64_t) klaviaturos_pertr_isr, 0b10001110);
-
 };

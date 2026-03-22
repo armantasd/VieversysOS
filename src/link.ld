@@ -7,7 +7,7 @@ SECTIONS {
     .boottext : {
         *(.boottext)
     }
-    .gdt : {
+    .gdt : ALIGN(4096){
         *(.gdt)
     }
     . += 0xFFFFFFFFFFDF5000;

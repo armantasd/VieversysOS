@@ -4,14 +4,21 @@
 #include"idt.h"
 #include"laikrodis.h"
 #include"raides.h"
+#include"vektoriai.h"
+
+extern void Tr_sk_init();
+extern void dalybos_klaida();
 
 static bool Didz_raides;
 static bool Capslock;
 
 void kernel_main()
 {
-	print("Labas");
-	print("%r", '\b');
+	// istrinti pirma irasa
+	//asm volatile ("movq %%cr3, %%rax\n" "movq %%rax, %%cr3" : : : "rax", "memory");
+	// uint64_t* pusl_prad = (uint64_t*) 0x100000;
+	// *pusl_prad = 0;
+
 	InicijuotiAlloc();
 	InicijuotiPAlloc();
 	struct pertr_lent_ptr pertraukimai;
@@ -24,22 +31,14 @@ void kernel_main()
 	InicijuotiIDTirasus(pertr_irasai);
 	pertraukimai.limitas = sizeof(struct pertr_irasas) * 256 - 1;
 	pertraukimai.adresas = (uint64_t) pertr_irasai;
-
-	int* skaiciai = malloc(20);
-	for (int i = 0; i < 20; i++)
-	{
-		skaiciai[i] = i;
-	}
-	for (int i = 0; i < 20; i++)
-	{
-		print("%s\n", skaiciai[i]);
-	}
-	free(skaiciai);
-	p_lentele *nauja_lent = palloc();
-	nauja_lent->irasas[0] = 2342;
-	print("%s", nauja_lent->irasas[0]);
 	asm volatile ("lidt %0\n" "sti\n" : : "m" (pertraukimai) : "memory");
+	Tr_sk_init();
+	InicijuotiVAlloc(800);
+
+	//void* puslapiai = valloc(20);
+	//print("%p", *((uint64_t*)puslapiai));
 	//Inicijuoti_Laikrodi(100);
+	for(;;);
 	return;
 }
 void Ant_laikmacio_pabaigos()

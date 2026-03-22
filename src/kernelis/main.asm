@@ -76,11 +76,13 @@ ioend_page_loop:
 	; heap space
 	mov qword [hhpdpt + 8176], 0x200083 ; malloc
 	mov qword [hhpdpt + 8168], 0x400083 ; palloc
+;	mov qword [hhpdpt + 8168], 0x600083 ; ramdisk
 	; map page tables
-	mov qword [hhpt + 0xb4 * 8], pml4 + 3 
+	mov qword [hhpt + 0xb4 * 8], pml4 + 3 ; 0xffffffffffe5a000
 	mov qword [hhpt + 0xb5 * 8], hhpdpt + 3
 	mov qword [hhpt + 0xb6 * 8], hhpdpt + 4096 + 3 ; hhpd
 	mov qword [hhpt + 0xb7 * 8], hhpt + 3
+	mov qword [hhpt + 0xb8 * 8], sgdt_start + 3 ; 0xFFFFFFFFFFEB8000
 	call kernel_main
     hlt
 	jmp $
@@ -134,17 +136,18 @@ sgdt_start:
 	db 0
 	; tss segment
 	dw 0x93
-	dw tss
-	db 0
+	tss_mod: dw tss
+	tss_mod_mid: db 0
 	db 0x89
 	db 0
-	db 0
-	dq 0
+	tss_mod_high: db 0
+	tss_mod_higher: dd 0
+	dd 0
 sgdt_end:
 
 sgdt_descriptor:
 	dw sgdt_end - sgdt_start - 1
-	dq sgdt_start
+	gdt_mod: dq sgdt_start
 
 tss:
 	times 148 db 0
