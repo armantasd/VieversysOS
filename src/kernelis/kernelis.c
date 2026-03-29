@@ -5,6 +5,7 @@
 #include"laikrodis.h"
 #include"raides.h"
 #include"vektoriai.h"
+#include"gdt.h"
 
 extern void Tr_sk_init();
 extern void dalybos_klaida();
@@ -15,28 +16,25 @@ static bool Capslock;
 void kernel_main()
 {
 	// istrinti pirma irasa
-	//asm volatile ("movq %%cr3, %%rax\n" "movq %%rax, %%cr3" : : : "rax", "memory");
-	// uint64_t* pusl_prad = (uint64_t*) 0x100000;
-	// *pusl_prad = 0;
-
+	uint64_t* pusl_prad = (uint64_t*) 0x100000;
+	*pusl_prad = 0;
+	asm volatile ("movq %%cr3, %%rax\n" "movq %%rax, %%cr3" : : : "rax", "memory");
 	InicijuotiAlloc();
 	InicijuotiPAlloc();
+	print("Atminties priskirejai veikia\n");
+	InicijuotiGDT();
+	print("GDT veikia\n");
 	struct pertr_lent_ptr pertraukimai;
 	struct pertr_irasas *pertr_irasai = malloc(sizeof(struct pertr_irasas) * 256);
-	if (pertr_irasai == NULL)
-	{
-		print("Nepavyko priskirti vietos pertraukymams.");
-		return;
-	}
 	InicijuotiIDTirasus(pertr_irasai);
 	pertraukimai.limitas = sizeof(struct pertr_irasas) * 256 - 1;
 	pertraukimai.adresas = (uint64_t) pertr_irasai;
 	asm volatile ("lidt %0\n" "sti\n" : : "m" (pertraukimai) : "memory");
+	print("Pertraukymai paruosti\n");
 	Tr_sk_init();
+	print("FPU pajungtas\n");
 	InicijuotiVAlloc(800);
-
-	//void* puslapiai = valloc(20);
-	//print("%p", *((uint64_t*)puslapiai));
+	print("Virtuolios atminties priskirejas paruostas\n");
 	//Inicijuoti_Laikrodi(100);
 	for(;;);
 	return;

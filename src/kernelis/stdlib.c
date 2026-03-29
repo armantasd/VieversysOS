@@ -154,6 +154,7 @@ void* valloc(unsigned int puslapiu_sk)
 		}
 		if (j == atminties_dydis)
 		{
+			free(puslapiai);
 			return NULL;
 		}
 	}
@@ -174,35 +175,44 @@ void* valloc(unsigned int puslapiu_sk)
 		}
 	}
 	// supuslapiuoti
-	// p_lentele* pml4 = (p_lentele*) PUSL_LENT;
-	// for(unsigned int i = 0; i < puslapiu_sk; i++)
-	// {
-	// 	int pml4_ind = ((uint64_t) naujas_blokas.pradzia >> 39 & 0b111111111) + i / (512 * 512 * 512) % 512;
-	// 	int pdpt_ind = ((uint64_t) naujas_blokas.pradzia >> 30 & 0b111111111) + i / (512 * 512) % 512;
-	// 	int pd_ind = ((uint64_t) naujas_blokas.pradzia >> 21 & 0b111111111) + i / 512 % 512;
-	// 	int pt_ind = ((uint64_t) naujas_blokas.pradzia >> 12 & 0b111111111) + i % 512;
-	// 	p_lentele* pdpt = (p_lentele*) (pml4->irasas[pml4_ind] - 3);
-	// 	if ((void*) pdpt + 3 == 0)
-	// 	{
-	// 		pdpt = palloc();
-	// 		pml4->irasas[pml4_ind] = (uint64_t) pdpt + 3;
-	// 	}
-	// 	pdpt = (p_lentele*)((void*)pdpt + PHEAP_PRAD - 0x400000); // vertimas i virtualia, kad galetume skaityt.
-	// 	p_lentele* pd = (p_lentele*) (pdpt->irasas[pdpt_ind] - 3);
-	// 	if ((void*) pd + 3 == 0)
-	// 	{
-	// 		pd = palloc();
-	// 		pdpt->irasas[pdpt_ind] = (uint64_t) pd + 3;
-	// 	}
-	// 	pd = (p_lentele*)((void*)pd + PHEAP_PRAD - 0x400000);
-	// 	p_lentele* pt = (p_lentele*) (pd->irasas[pd_ind] - 3);
-	// 	if ((void*) pt + 3 == 0)
-	// 	{
-	// 		pt = palloc();
-	// 		pd->irasas[pd_ind] = (uint64_t) pt + 3;
-	// 	}
-	// 	pt = (p_lentele*)((void*)pt + PHEAP_PRAD - 0x400000);
-	// 	pt->irasas[pt_ind] = (uint64_t) puslapiai[i] + 3;
-	// }
+	p_lentele* pml4 = (p_lentele*) PUSL_LENT;
+	for(unsigned int i = 0; i < puslapiu_sk; i++)
+	{
+		int pml4_ind = ((uint64_t) naujas_blokas.pradzia >> 39 & 0b111111111) + i / (512 * 512 * 512) % 512;
+		int pdpt_ind = ((uint64_t) naujas_blokas.pradzia >> 30 & 0b111111111) + i / (512 * 512) % 512;
+		int pd_ind = ((uint64_t) naujas_blokas.pradzia >> 21 & 0b111111111) + i / 512 % 512;
+		int pt_ind = ((uint64_t) naujas_blokas.pradzia >> 12 & 0b111111111) + i % 512;
+		p_lentele* pdpt = (p_lentele*) (pml4->irasas[pml4_ind] - 3);
+		if ((void*) pdpt + 3 == 0)
+		{
+			pdpt = palloc();
+			pml4->irasas[pml4_ind] = (uint64_t) pdpt + 3;
+		}
+		pdpt = (p_lentele*)((void*)pdpt + PHEAP_PRAD - 0x400000); // vertimas i virtualia, kad galetume skaityt.
+		p_lentele* pd = (p_lentele*) (pdpt->irasas[pdpt_ind] - 3);
+		if ((void*) pd + 3 == 0)
+		{
+			pd = palloc();
+			pdpt->irasas[pdpt_ind] = (uint64_t) pd + 3;
+		}
+		pd = (p_lentele*)((void*)pd + PHEAP_PRAD - 0x400000);
+		p_lentele* pt = (p_lentele*) (pd->irasas[pd_ind] - 3);
+		if ((void*) pt + 3 == 0)
+		{
+			pt = palloc();
+			pd->irasas[pd_ind] = (uint64_t) pt + 3;
+		}
+		pt = (p_lentele*)((void*)pt + PHEAP_PRAD - 0x400000);
+		pt->irasas[pt_ind] = (uint64_t) puslapiai[i] + 3;
+	}
+	// perkrauti puslapiu lenteles
+	asm volatile ("movq %%cr3, %%rax\n" "movq %%rax, %%cr3" : : : "rax", "memory");
+	free(puslapiai);
 	return naujas_blokas.pradzia;
+}
+void vfree(void* ptr)
+{
+	//atlaisvinti virtualia atminti
+	//atlaisvinti fizine atminti
+	//atlaisvinti puslapius
 }

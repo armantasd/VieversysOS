@@ -76,7 +76,7 @@ ioend_page_loop:
 	; heap space
 	mov qword [hhpdpt + 8176], 0x200083 ; malloc
 	mov qword [hhpdpt + 8168], 0x400083 ; palloc
-;	mov qword [hhpdpt + 8168], 0x600083 ; ramdisk
+	; mov qword [hhpdpt + 8170], 0x600083 ; ramdisk
 	; map page tables
 	mov qword [hhpt + 0xb4 * 8], pml4 + 3 ; 0xffffffffffe5a000
 	mov qword [hhpt + 0xb5 * 8], hhpdpt + 3
