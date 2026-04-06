@@ -58,16 +58,16 @@ pargindine:
 	cli
 	lgdt [gdt_descriptor]
 	xor ax, ax
-	mov bx, 0
-	mov fs, bx
-	mov gs, bx
-	mov ds, bx
-	mov es, bx
-	mov ss, bx
-	mov sp, 0x7c00
-	xor bx, bx
 	mov eax, cr0
 	or al, 1
 	mov cr0, eax
 	jmp 0x08:bootstrap_end
+[bits 32]
 bootstrap_end:
+	mov eax, 0x10
+	mov fs, eax
+	mov gs, eax
+	mov ds, eax
+	mov es, eax
+	mov ss, eax
+	mov esp, 0x7c00

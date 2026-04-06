@@ -6,7 +6,7 @@ nop
 ; FAT12 header (too lazy to translate that, it's a FAT12 header anyways lol)
 bdb_oem: db 'MSWIN4.1'
 bdb_sektoriaus_dydis: dw 512
-bdb_sektoriai_per_clusteri: db 1
+bdb_sektoriai_per_clusteri: db 2
 bdb_reservuoti_sektoriai: dw 1
 bdb_fat_skaicius: db 2
 bdb_dir_irasu_sk: dw 224
@@ -49,7 +49,7 @@ end_print_loop:
 read_sector_chs:
     pusha
     mov ah, 0x02
-;    mov dl, 0x80 ; for hardware testing on drives
+    mov dl, [ebr_drive_sk]
     int 0x13
     jc .error
     popa
@@ -105,6 +105,7 @@ disk_retry:
 	ret
 ;
 main:
+	mov [ebr_drive_sk], dl
 	mov ax, 0
 	mov bx, 0
 	mov ds, ax
@@ -124,6 +125,27 @@ main:
 	push 14
 	call disk_read
 	add sp, 6
+
+	mov ax, 0x4000
+	mov es, ax
+	mov bx, 5
+	mov cx, 1
+.loop:
+	cmp bx, 0
+	je .pabaiga
+	push 0
+	push cx
+	push 128
+	call disk_read
+	add ax, 0x1000
+	mov es, ax
+	add cx, 128
+	dec bx
+	jmp .loop
+.pabaiga:
+	add sp, 6
+	mov ax, 0
+	mov es, ax
 
 	; Look for kernel
 	mov si, root_dir
@@ -208,3 +230,4 @@ dw 0AA55h
 FAT_tables equ 0x7e00 ; 18 sectors for FAT table
 root_dir equ 0xa200 ; 14 sectors for root dir entries
 kernel equ 0xb000 ; kernel
+ramdisk equ 0x10000

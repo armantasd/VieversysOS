@@ -43,7 +43,7 @@ void InicijuotiVAlloc(unsigned int puslapiu_sk)
 	vblokai = Vektorius(sizeof(vblokas));
 	vblokas kernelis;
 	vblokas pradzia;
-	kernelis.pradzia = (void*) RAMDISK;
+	kernelis.pradzia = (void*) PHEAP_PRAD;
 	kernelis.galas = (void*) ~((uint64_t) 0x0);
 	pradzia.pradzia = (void*) 0x0;
 	pradzia.galas = (void*) 0x0;
@@ -213,6 +213,40 @@ void* valloc(unsigned int puslapiu_sk)
 void vfree(void* ptr)
 {
 	//atlaisvinti virtualia atminti
-	//atlaisvinti fizine atminti
-	//atlaisvinti puslapius
+	vblokas dabartinis_b;
+	for (int i = 0; i < vblokai->elementu_sk + 1; i++)
+	{
+		if(i == vblokai->elementu_sk)
+		{
+			print("tokio ptr nera");
+			return;
+		}
+		dabartinis_b = *((vblokas*)vblokai->reiksmes + i);
+		if (dabartinis_b.pradzia == ptr)
+		{
+			istrinti(vblokai, i);
+			break;
+		}
+	}
+	int puslapiu_sk = (int)(((uint64_t)dabartinis_b.galas - (uint64_t)dabartinis_b.pradzia) / 4096);
+	//atlaisvinti puslapius ir fizine atminti
+	p_lentele* pml4 = (p_lentele*) PUSL_LENT;
+	for(int i = 0; i < puslapiu_sk; i++)
+	{
+		int pml4_ind = ((uint64_t) dabartinis_b.pradzia >> 39 & 0b111111111) + i / (512 * 512 * 512) % 512;
+		int pdpt_ind = ((uint64_t) dabartinis_b.pradzia >> 30 & 0b111111111) + i / (512 * 512) % 512;
+		int pd_ind = ((uint64_t) dabartinis_b.pradzia >> 21 & 0b111111111) + i / 512 % 512;
+		int pt_ind = ((uint64_t) dabartinis_b.pradzia >> 12 & 0b111111111) + i % 512;
+		p_lentele* pdpt = (p_lentele*) (pml4->irasas[pml4_ind] - 3);
+		pdpt = (p_lentele*)((void*)pdpt + PHEAP_PRAD - 0x400000);
+		p_lentele* pd = (p_lentele*) (pdpt->irasas[pdpt_ind] - 3);
+		pd = (p_lentele*)((void*)pd + PHEAP_PRAD - 0x400000);
+		p_lentele* pt = (p_lentele*) (pd->irasas[pd_ind] - 3);
+		pt = (p_lentele*)((void*)pt + PHEAP_PRAD - 0x400000);
+		uint64_t puslapis = pt->irasas[pt_ind] - 3;
+		pt->irasas[pt_ind] = 0;
+		int bitmap_indeksas = (puslapis - 0x600000) / 4096;
+		uint8_t kauke = ~(1 << (bitmap_indeksas % 8));
+		f_bitmap[bitmap_indeksas >> 3] &= kauke;
+	}
 }

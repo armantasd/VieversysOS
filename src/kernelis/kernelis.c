@@ -6,6 +6,8 @@
 #include"raides.h"
 #include"vektoriai.h"
 #include"gdt.h"
+#include"procesai.h"
+#include"failai.h"
 
 extern void Tr_sk_init();
 extern void dalybos_klaida();
@@ -35,6 +37,10 @@ void kernel_main()
 	print("FPU pajungtas\n");
 	InicijuotiVAlloc(800);
 	print("Virtuolios atminties priskirejas paruostas\n");
+	uint16_t fptr = atidaryti("/VINITD.ELF");
+	Inicijuoti_procesus();
+	Paleisti_init_demona(fptr);
+	print("Paleistas vievinitd");
 	//Inicijuoti_Laikrodi(100);
 	for(;;);
 	return;

@@ -1,3 +1,4 @@
+#pragma once
 #include<stdint.h>
 #define NULL 0x0
 
@@ -6,7 +7,6 @@
 #define PHEAP_PRAD 0xFFFFFFFFFFA00000
 #define PHEAP_PAB 0xFFFFFFFFFFC00000
 #define PUSL_LENT 0xFFFFFFFFFFEB4000
-#define RAMDISK 0xFFFFFFFFFF800000
 struct p_lentele {
 	uint64_t irasas[512];
 }__attribute__((packed));

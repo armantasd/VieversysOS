@@ -1,3 +1,4 @@
+#pragma once
 typedef struct vektorius vektorius;
 #include<stdint.h>
 

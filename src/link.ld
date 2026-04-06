@@ -3,7 +3,7 @@ ENTRY(_start)
 VIR_OFF = 0xFFFFFFFFFFDF5000;
 
 SECTIONS {
-    . = 0xb0d0;	
+    . = 0xb0d2;	
     .boottext : {
         *(.boottext)
     }
