@@ -16,7 +16,7 @@ vektorius* Vektorius(int elemento_dydis)
 
 void push_back(vektorius* vektorius, void* elementas)
 {
-	if(vektorius->elementu_sk + vektorius->elemento_dydis > vektorius->rezervuota)
+	if((vektorius->elementu_sk + 1) * vektorius->elemento_dydis > vektorius->rezervuota)
 	{
 		int nauja_rez = (int) vektorius->rezervuota * R + vektorius->elemento_dydis;
 		vektorius->reiksmes = realloc(vektorius->reiksmes, nauja_rez);

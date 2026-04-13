@@ -1,11 +1,15 @@
 #include<stdint.h>
 
-typedef struct {
+typedef struct procesas procesas;
+
+struct procesas {
     int PID;
     int PPID;
     uint8_t busena;
     void* kst;
-} procesas;
+    void* cr3;
+   	procesas* kitas_proc;
+};
 void Inicijuoti_procesus();
 void Paleisti_init_demona(uint16_t fptr);
 void Ant_laiko_pabaigos();
@@ -28,11 +32,11 @@ typedef struct {
 } elf_headeris;
 typedef struct {
 	uint32_t tipas;
+	uint32_t veliavos;
 	uint64_t adresas;
 	uint64_t vadresas;
 	uint64_t padresas;
-	uint32_t dydis;
-	uint32_t atmdydis;
-	uint32_t veliavos;
-	uint32_t lygiavimas;
+	uint64_t dydis;
+	uint64_t atmdydis;
+	uint64_t lygiavimas;
 } segmentas;

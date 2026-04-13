@@ -94,8 +94,6 @@ void skaityti(void* isvestis, int baitu_sk, int paslinkimas, uint16_t failas)
 			{
 				return;
 			}
-			// print("Pirmas baitas: %s, antras baitas: %s\n", fat_lent[3 * klasteris / 2], fat_lent[3 * klasteris / 2 + 1]);
-			print("%s\n", klasteris);
 			baitas = 0;
 		}
 		*(uint8_t*)(isvestis + i) = *(uint8_t*)(Data + klasteris * 1024 + baitas);

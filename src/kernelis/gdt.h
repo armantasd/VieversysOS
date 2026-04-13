@@ -6,6 +6,9 @@ typedef struct GDTirasas GDTirasas;
 typedef struct GDTSistemosIrasas GDTSistemosIrasas;
 typedef struct tss tss;
 
+extern GDTdeskriptorius* gdt_ptr;
+extern tss* tss_ptr;
+
 struct GDTdeskriptorius
 {
 	uint16_t dydis;

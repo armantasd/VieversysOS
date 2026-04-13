@@ -35,7 +35,7 @@ void kernel_main()
 	print("Pertraukymai paruosti\n");
 	Tr_sk_init();
 	print("FPU pajungtas\n");
-	InicijuotiVAlloc(800);
+	InicijuotiVAlloc(80000);
 	print("Virtuolios atminties priskirejas paruostas\n");
 	uint16_t fptr = atidaryti("/VINITD.ELF");
 	Inicijuoti_procesus();
