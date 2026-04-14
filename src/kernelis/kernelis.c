@@ -2,7 +2,6 @@
 #include<stdbool.h>
 #include"stdlib.h"
 #include"idt.h"
-#include"laikrodis.h"
 #include"raides.h"
 #include"vektoriai.h"
 #include"gdt.h"
@@ -41,12 +40,7 @@ void kernel_main()
 	Inicijuoti_procesus();
 	Paleisti_init_demona(fptr);
 	print("Paleistas vievinitd");
-	//Inicijuoti_Laikrodi(100);
 	for(;;);
-	return;
-}
-void Ant_laikmacio_pabaigos()
-{
 	return;
 }
 void Klaviaturos_pertraukymas()

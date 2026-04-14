@@ -2,6 +2,8 @@
 
 typedef struct procesas procesas;
 
+extern procesas* dabartinis_p;
+
 struct procesas {
     int PID;
     int PPID;
@@ -9,7 +11,7 @@ struct procesas {
     void* kst;
     void* cr3;
    	procesas* kitas_proc;
-};
+}__attribute__((packed));
 void Inicijuoti_procesus();
 void Paleisti_init_demona(uint16_t fptr);
 void Ant_laiko_pabaigos();

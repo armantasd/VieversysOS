@@ -1,8 +1,9 @@
 extern print
 ; print funkcija - void print(char* buffer, void* argv);
-extern Ant_laikmacio_pabaigos
 extern Klaviaturos_pertraukymas
 extern irasyti_i_porta
+extern dabartinis_p
+extern tss_ptr
 
 section .data
 	nulis: db 0
@@ -141,11 +142,21 @@ global laikmacio_pab_isr
 laikmacio_pab_isr:
 	cli
 	pushall
-	call pertraukymo_aptvarkymas
-	call Ant_laikmacio_pabaigos
-	mov rdi, 0x20
-	mov rsi, 0x20
-	call irasyti_i_porta
+	mov ax, 0
+	mov ds, ax
+	mov es, ax
+	mov fs, ax
+	mov gs, ax
+	mov rax, [dabartinis_p]
+	mov rbx, [rax + 25]
+	mov [dabartinis_p], rbx
+	mov rax, [rbx + 17]
+	mov cr3, rax
+	mov rax, [rbx + 9]
+	mov rcx, [tss_ptr]
+	mov [rcx + 4], rax
+	mov ax, 0x20
+	out 0x20, ax
 	popall
 	sti
 	iretq
@@ -156,9 +167,8 @@ klaviaturos_pertr_isr:
 	pushall
 	call pertraukymo_aptvarkymas
 	call Klaviaturos_pertraukymas
-	mov rdi, 0x20
-	mov rsi, 0x20
-	call irasyti_i_porta
+	mov ax, 0x20
+	out 0x20, ax
 	popall
 	sti
 	iretq

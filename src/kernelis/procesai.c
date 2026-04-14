@@ -5,12 +5,15 @@
 #include"gdt.h"
 #include"failai.h"
 #include"stdio.h"
+#include"laikrodis.h"
 
 static vektorius* procesai;
-static int veikiantis_procesas;
-static int procesu_sk;
+static int veikiantis_procesas = 0;
+static int procesu_sk = 0;
 void mmap(p_lentele* pml4, uint64_t virt, void* fiz, unsigned int puslapiu_sk, uint8_t veliavos);
 uint64_t Surasti_fiz(uint64_t virt);
+
+procesas* dabartinis_p;
 
 void Inicijuoti_procesus()
 {
@@ -70,18 +73,22 @@ void Paleisti_init_demona(uint16_t fptr)
    	paskutinis_add &= (~0xfff);
    	mmap(atmintis + 4096, paskutinis_add, fiz, 5, 7);
    	paskutinis_add += 4096 * 4;
-   	initd.kst = (void*)(PHEAP_PRAD - 4096 * 2);
+   	initd.kst = (void*)((uint64_t)0xff << 39);
     fiz = (void*)Surasti_fiz((uint64_t)atmintis);
    	mmap(atmintis + 4096, (uint64_t)initd.kst, fiz, 2, 3);
    	p_lentele* puslapiu_lent = atmintis + 4096;
     puslapiu_lent->irasas[511] = *((uint64_t*)PUSL_LENT + 511);
-    veikiantis_procesas = 0;
-   	procesu_sk = 1;
+    veikiantis_procesas = procesu_sk;
+   	procesu_sk += 1;
+   	initd.kst += 4096 - 8;
    	tss_ptr->rsp0 = (uint64_t)initd.kst;
    	initd.cr3 = fiz + 4096;
    	push_back(procesai, &initd);
    	procesas* proc = ((procesas*)procesai->reiksmes + veikiantis_procesas);
    	proc->kitas_proc = (procesas*)procesai->reiksmes + ((veikiantis_procesas + 1) % procesu_sk);
+	atlaisvinti_vkt(Load_segm);
+   	dabartinis_p = proc;
+	Inicijuoti_Laikrodi(100);
    	asm volatile ("mov %0, %%cr3" : : "r" (initd.cr3) : "rax");
   	asm volatile ("push $0x1b\n" "push %0" : : "r" (paskutinis_add) : "rax");
   	asm volatile ("push $0x202\n" "push $0x13\n" "push %0" : : "r" (elfh.pradz) : "rax");
