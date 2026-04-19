@@ -7,6 +7,7 @@
 #include"gdt.h"
 #include"procesai.h"
 #include"failai.h"
+#include"sisiskvietimai.h"
 
 extern void Tr_sk_init();
 extern void dalybos_klaida();
@@ -38,8 +39,9 @@ void kernel_main()
 	print("Virtuolios atminties priskirejas paruostas\n");
 	uint16_t fptr = atidaryti("/VINITD.ELF");
 	Inicijuoti_procesus();
+	Inicijuoti_sistemos_iskvietimus();
+	print("Paleidziamas vievinitd");
 	Paleisti_init_demona(fptr);
-	print("Paleistas vievinitd");
 	for(;;);
 	return;
 }

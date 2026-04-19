@@ -7,8 +7,8 @@ tss* tss_ptr;
 void InicijuotiGDT()
 {
 	gdt_ptr = malloc(sizeof(GDTdeskriptorius));
-	gdt_ptr->ptr = malloc(sizeof(GDTirasas) * 6);
-	gdt_ptr->dydis = sizeof(GDTirasas) * 6 - 1;
+	gdt_ptr->ptr = malloc(sizeof(GDTirasas) * 7);
+	gdt_ptr->dydis = sizeof(GDTirasas) * 7 - 1;
 	uint64_t* gdt_0 = (uint64_t*) gdt_ptr->ptr;
 	*gdt_0 = 0;
 	GDTirasas* gdt_kodas = gdt_ptr->ptr + 1;
@@ -18,7 +18,14 @@ void InicijuotiGDT()
 	gdt_kodas->prieeigos_baitas = 0b10011010;
 	gdt_kodas->veliavos = 0b10101111;
 	gdt_kodas->adresas_a = 0;
-	GDTirasas* gdt_ndt_kodas = gdt_ptr->ptr + 2;
+	GDTirasas* gdt_data = gdt_ptr->ptr + 2;
+	gdt_data->dydis = 0xffff;
+	gdt_data->adresas_z = 0;
+	gdt_data->adresas_v = 0;
+	gdt_data->prieeigos_baitas = 0b10010010;
+	gdt_data->veliavos = 0b10101111;
+	gdt_data->adresas_a = 0;
+	GDTirasas* gdt_ndt_kodas = gdt_ptr->ptr + 4;
 	gdt_ndt_kodas->dydis = 0xffff;
 	gdt_ndt_kodas->adresas_z = 0;
 	gdt_ndt_kodas->adresas_v = 0;
@@ -32,7 +39,7 @@ void InicijuotiGDT()
 	gdt_ndt_data->prieeigos_baitas = 0b11110010;
 	gdt_ndt_data->veliavos = 0b10101111;
 	gdt_ndt_data->adresas_a = 0;
-	GDTSistemosIrasas* tss_irasas = (GDTSistemosIrasas*) (gdt_ptr->ptr + 4);
+	GDTSistemosIrasas* tss_irasas = (GDTSistemosIrasas*) (gdt_ptr->ptr + 5);
 	uint64_t tss_segmentas = (uint64_t) malloc(104);
 	irasyti_baitus((uint8_t*) tss_segmentas, 0, 104);
 	tss_irasas->dydis = 104;
@@ -44,7 +51,6 @@ void InicijuotiGDT()
 	tss_irasas->adresas_p = tss_segmentas >> 32;
 	tss_irasas->rezervuota = 0;
 	tss_ptr = (tss*) tss_segmentas;
-	tss_ptr->iopb = 104;
 	asm volatile (
 	"lgdt %0\n" 
 	"mov $0, %%ax\n" 
@@ -56,5 +62,5 @@ void InicijuotiGDT()
 	:  
 	: "m"(*gdt_ptr) 
 	: "memory", "ax");
-	asm volatile ("ltr %0" : : "r"(0x20));
+	asm volatile ("ltr %0" : : "r"(0x28));
 }

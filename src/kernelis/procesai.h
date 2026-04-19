@@ -3,6 +3,7 @@
 typedef struct procesas procesas;
 
 extern procesas* dabartinis_p;
+extern uint64_t extra_reg;
 
 struct procesas {
     int PID;

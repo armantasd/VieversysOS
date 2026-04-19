@@ -14,6 +14,7 @@ void mmap(p_lentele* pml4, uint64_t virt, void* fiz, unsigned int puslapiu_sk, u
 uint64_t Surasti_fiz(uint64_t virt);
 
 procesas* dabartinis_p;
+uint64_t extra_reg;
 
 void Inicijuoti_procesus()
 {
@@ -80,7 +81,7 @@ void Paleisti_init_demona(uint16_t fptr)
     puslapiu_lent->irasas[511] = *((uint64_t*)PUSL_LENT + 511);
     veikiantis_procesas = procesu_sk;
    	procesu_sk += 1;
-   	initd.kst += 4096 - 8;
+   	initd.kst += 4096 + 8;
    	tss_ptr->rsp0 = (uint64_t)initd.kst;
    	initd.cr3 = fiz + 4096;
    	push_back(procesai, &initd);
@@ -88,10 +89,11 @@ void Paleisti_init_demona(uint16_t fptr)
    	proc->kitas_proc = (procesas*)procesai->reiksmes + ((veikiantis_procesas + 1) % procesu_sk);
 	atlaisvinti_vkt(Load_segm);
    	dabartinis_p = proc;
+   	asm volatile ("cli");
 	Inicijuoti_Laikrodi(100);
    	asm volatile ("mov %0, %%cr3" : : "r" (initd.cr3) : "rax");
   	asm volatile ("push $0x1b\n" "push %0" : : "r" (paskutinis_add) : "rax");
-  	asm volatile ("push $0x202\n" "push $0x13\n" "push %0" : : "r" (elfh.pradz) : "rax");
+  	asm volatile ("push $0x202\n" "push $0x23\n" "push %0" : : "r" (elfh.pradz) : "rax");
 	asm volatile ("mov $0, %rbp\n");
   	asm volatile ("iretq");
    	for(;;);

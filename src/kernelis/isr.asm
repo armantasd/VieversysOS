@@ -147,13 +147,19 @@ laikmacio_pab_isr:
 	mov es, ax
 	mov fs, ax
 	mov gs, ax
+	
 	mov rax, [dabartinis_p]
+	mov [rax + 9], rsp
+	
 	mov rbx, [rax + 25]
 	mov [dabartinis_p], rbx
+	
+	mov rsp, [rbx + 9]
 	mov rax, [rbx + 17]
 	mov cr3, rax
 	mov rax, [rbx + 9]
 	mov rcx, [tss_ptr]
+	add rax, 0xa0
 	mov [rcx + 4], rax
 	mov ax, 0x20
 	out 0x20, ax

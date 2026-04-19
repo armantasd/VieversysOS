@@ -35,8 +35,9 @@ $(BUILD_DIR)/kernelis.bin: $(OBIJEKTAI) | always
 	$(ASM) $(SRC_DIR)/kernelis/bootstrap.asm -fbin -o $(BUILD_DIR)/bootstrap.bin
 	$(ASM) -felf64 $(SRC_DIR)/kernelis/main.asm -o $(BUILD_DIR)/main.o
 	$(ASM) -felf64 $(SRC_DIR)/kernelis/isr.asm -o $(BUILD_DIR)/isr.o
+	$(ASM) -felf64 $(SRC_DIR)/kernelis/sisiskvietimai.asm -o $(BUILD_DIR)/sisiskvietimai.asm
 	# link libraries
-	$(LD) -nostdlib -T $(SRC_DIR)/link.ld  $(BUILD_DIR)/main.o $(BUILD_DIR)/isr.o $(OBIJEKTAI) -o $(BUILD_DIR)/kernelis.elf
+	$(LD) -nostdlib -T $(SRC_DIR)/link.ld  $(BUILD_DIR)/main.o $(BUILD_DIR)/isr.o $(BUILD_DIR)/sisiskvietimai.asm $(OBIJEKTAI) -o $(BUILD_DIR)/kernelis.elf
 	$(OCPY) -O binary $(BUILD_DIR)/kernelis.elf $(BUILD_DIR)/kernelis_body.bin
 	cat $(BUILD_DIR)/bootstrap.bin $(BUILD_DIR)/kernelis_body.bin > $(BUILD_DIR)/kernelis.bin
 always:
