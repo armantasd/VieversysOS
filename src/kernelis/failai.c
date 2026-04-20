@@ -3,6 +3,8 @@
 #include"failai.h"
 #include"stdio.h"
 
+fd* fd_lent;
+
 uint16_t atidaryti(char* failo_lokacija)
 {
 	direktorija* dir = (void*)RAMDISK + 18 * 512;

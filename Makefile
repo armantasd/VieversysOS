@@ -22,6 +22,7 @@ $(BUILD_DIR)/main_flash.img: bootloaderis kernelis
 	mkfs.fat -F12 -n "VIEVERSYSOS" $(BUILD_DIR)/main_flash.img
 	dd if=$(BUILD_DIR)/bootloaderis.bin of=$(BUILD_DIR)/main_flash.img conv=notrunc
 	mcopy -i $(BUILD_DIR)/main_flash.img $(BUILD_DIR)/kernelis.bin "::kernelis.bin"
+	gcc -static -nostdlib -fno-stack-protector src/vievinitd/vievinitd.c -o vievroot/vievinitd
 	mcopy -i $(BUILD_DIR)/main_flash.img vievroot/vievinitd "::vinitd.elf"
 
 bootloaderis: $(BUILD_DIR)/bootloaderis.bin

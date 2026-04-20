@@ -1,11 +1,6 @@
 void _start()
 {
-	for(;;)
-	{
-		int a = 5;
-		int b = 6;
-		int c = a + b;
-		asm volatile("mov $0, %rax\n" "syscall\n");
-		asm volatile("mov $1, %rax\n" "mov $500000000, %rdi\n" "syscall\n");
-	}
+	char failo_vard[] = "/VINITD.ELF";
+	asm volatile ("mov $2, %%rax\n" "mov %0, %%rdi\n" "syscall" : : "r" (failo_vard) : "rax", "rdi");
+	for(;;);
 }

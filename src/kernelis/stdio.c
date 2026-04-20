@@ -5,6 +5,7 @@
 #include"vektoriai.h"
 
 static int VGA_buffer_indeksas;
+vektorius* stdivestis;
 
 void Prideti_eilute();
 inline void Perkrauti_zymekli(int zymeklio_pos);
@@ -103,7 +104,6 @@ void print(char* tekstas, ...)
 							prtchr('\0', VGA_buffer_indeksas);
 							i += 2;
 						}
-						
 					}
 					else if(raide == '\n')
 					{

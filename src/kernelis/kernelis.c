@@ -31,12 +31,15 @@ void kernel_main()
 	InicijuotiIDTirasus(pertr_irasai);
 	pertraukimai.limitas = sizeof(struct pertr_irasas) * 256 - 1;
 	pertraukimai.adresas = (uint64_t) pertr_irasai;
+	stdivestis = Vektorius(1);
 	asm volatile ("lidt %0\n" "sti\n" : : "m" (pertraukimai) : "memory");
 	print("Pertraukymai paruosti\n");
 	Tr_sk_init();
 	print("FPU pajungtas\n");
 	InicijuotiVAlloc(80000);
 	print("Virtuolios atminties priskirejas paruostas\n");
+	fd_lent = malloc(sizeof(fd) * 256);
+	irasyti_baitus((uint8_t*)fd_lent, 0, sizeof(fd) * 256);
 	uint16_t fptr = atidaryti("/VINITD.ELF");
 	Inicijuoti_procesus();
 	Inicijuoti_sistemos_iskvietimus();
@@ -100,6 +103,7 @@ void Klaviaturos_pertraukymas()
 						break;
 					}
 					print("%r", raide);
+					push_back(stdivestis, &raide);
 				}
 				else
 				{
@@ -108,7 +112,16 @@ void Klaviaturos_pertraukymas()
 					{
 						break;
 					}
-					print("%r", raide);	
+					print("%r", raide);
+					if (raide == '\b')
+					{
+						*(char*)(stdivestis->reiksmes + stdivestis->elementu_sk - 1) = '\0';
+						stdivestis->elementu_sk -= 1;
+					}
+					else
+					{
+						push_back(stdivestis, &raide);
+					}
 				}
 			}
 	}

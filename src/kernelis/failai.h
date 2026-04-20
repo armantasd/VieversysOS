@@ -6,6 +6,9 @@
 uint16_t atidaryti(char* failo_lokacija);
 void skaityti(void* isvestis, int baitu_sk, int paslinkimas, uint16_t failas);
 bool palyginti_teksta(char* tekstas1, char* tekstas2);
+typedef struct fd fd;
+
+extern fd* fd_lent;
 
 struct direktorija {
 	char pav[11];
@@ -22,3 +25,10 @@ struct direktorija {
 	uint32_t dydis;
 }__attribute__((packed));
 typedef struct direktorija direktorija;
+
+struct fd {
+	uint16_t klasteris;
+	int poslinkis;
+};
+
+
