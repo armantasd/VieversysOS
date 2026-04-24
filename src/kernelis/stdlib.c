@@ -2,6 +2,7 @@
 #include"stdlib.h"
 #include"vektoriai.h"
 #include"stdio.h"
+#include"procesai.h"
 
 static uint64_t p_bitmap[8];
 static vektorius* vblokai;
@@ -175,29 +176,30 @@ void* valloc(unsigned int puslapiu_sk)
 		}
 	}
 	// supuslapiuoti
-	p_lentele* pml4 = (p_lentele*) PUSL_LENT;
+	p_lentele* pml4;
+	pml4  = (p_lentele*) PUSL_LENT;
 	for(unsigned int i = 0; i < puslapiu_sk; i++)
 	{
 		int pml4_ind = ((uint64_t) naujas_blokas.pradzia >> 39 & 0b111111111) + i / (512 * 512 * 512) % 512;
 		int pdpt_ind = ((uint64_t) naujas_blokas.pradzia >> 30 & 0b111111111) + i / (512 * 512) % 512;
 		int pd_ind = ((uint64_t) naujas_blokas.pradzia >> 21 & 0b111111111) + i / 512 % 512;
 		int pt_ind = ((uint64_t) naujas_blokas.pradzia >> 12 & 0b111111111) + i % 512;
-		p_lentele* pdpt = (p_lentele*) (pml4->irasas[pml4_ind] - 3);
-		if ((void*) pdpt + 3 == 0)
+		p_lentele* pdpt = (p_lentele*) (pml4->irasas[pml4_ind] & (~0xfff));
+		if (pdpt == 0)
 		{
 			pdpt = palloc();
 			pml4->irasas[pml4_ind] = (uint64_t) pdpt + 3;
 		}
 		pdpt = (p_lentele*)((void*)pdpt + PHEAP_PRAD - 0x400000); // vertimas i virtualia, kad galetume skaityt.
-		p_lentele* pd = (p_lentele*) (pdpt->irasas[pdpt_ind] - 3);
-		if ((void*) pd + 3 == 0)
+		p_lentele* pd = (p_lentele*) (pdpt->irasas[pdpt_ind] & (~0xfff));
+		if (pd == 0)
 		{
 			pd = palloc();
 			pdpt->irasas[pdpt_ind] = (uint64_t) pd + 3;
 		}
 		pd = (p_lentele*)((void*)pd + PHEAP_PRAD - 0x400000);
-		p_lentele* pt = (p_lentele*) (pd->irasas[pd_ind] - 3);
-		if ((void*) pt + 3 == 0)
+		p_lentele* pt = (p_lentele*) (pd->irasas[pd_ind] & (~0xfff));
+		if (pt == 0)
 		{
 			pt = palloc();
 			pd->irasas[pd_ind] = (uint64_t) pt + 3;
@@ -230,20 +232,21 @@ void vfree(void* ptr)
 	}
 	int puslapiu_sk = (int)(((uint64_t)dabartinis_b.galas - (uint64_t)dabartinis_b.pradzia) / 4096);
 	//atlaisvinti puslapius ir fizine atminti
-	p_lentele* pml4 = (p_lentele*) PUSL_LENT;
+	p_lentele* pml4;
+	pml4 = (p_lentele*) PUSL_LENT;
 	for(int i = 0; i < puslapiu_sk; i++)
 	{
 		int pml4_ind = ((uint64_t) dabartinis_b.pradzia >> 39 & 0b111111111) + i / (512 * 512 * 512) % 512;
 		int pdpt_ind = ((uint64_t) dabartinis_b.pradzia >> 30 & 0b111111111) + i / (512 * 512) % 512;
 		int pd_ind = ((uint64_t) dabartinis_b.pradzia >> 21 & 0b111111111) + i / 512 % 512;
 		int pt_ind = ((uint64_t) dabartinis_b.pradzia >> 12 & 0b111111111) + i % 512;
-		p_lentele* pdpt = (p_lentele*) (pml4->irasas[pml4_ind] - 3);
+		p_lentele* pdpt = (p_lentele*) (pml4->irasas[pml4_ind]  & ~((uint64_t)0xfff));
 		pdpt = (p_lentele*)((void*)pdpt + PHEAP_PRAD - 0x400000);
-		p_lentele* pd = (p_lentele*) (pdpt->irasas[pdpt_ind] - 3);
+		p_lentele* pd = (p_lentele*) (pdpt->irasas[pdpt_ind]  & ~((uint64_t)0xfff));
 		pd = (p_lentele*)((void*)pd + PHEAP_PRAD - 0x400000);
-		p_lentele* pt = (p_lentele*) (pd->irasas[pd_ind] - 3);
+		p_lentele* pt = (p_lentele*) (pd->irasas[pd_ind]  & ~((uint64_t)0xfff));
 		pt = (p_lentele*)((void*)pt + PHEAP_PRAD - 0x400000);
-		uint64_t puslapis = pt->irasas[pt_ind] - 3;
+		uint64_t puslapis = pt->irasas[pt_ind]  & ~((uint64_t)0xfff);
 		pt->irasas[pt_ind] = 0;
 		int bitmap_indeksas = (puslapis - 0x600000) / 4096;
 		uint8_t kauke = ~(1 << (bitmap_indeksas % 8));

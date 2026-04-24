@@ -2,6 +2,7 @@
 #include"sisiskvietimai.h"
 #include"stdio.h"
 #include"failai.h"
+#include"stdlib.h"
 #include<stdbool.h>
 
 void cyp()
@@ -100,6 +101,14 @@ void sisuzdaryti(uint64_t fd)
 	(fd_lent + fd - 2)->klasteris = 0;
 	(fd_lent + fd - 2)->poslinkis = 0;
 }
+void* paleisti(uint64_t fd)
+{
+	asm volatile ("cli");
+	asm volatile("mov 0x7f8(%0), %%rbx\n" "mov $0x100000, %%rax\n" "mov %%rax, %%cr3\n" "mov %%rbx, 0x7f8(%1)" : : "r" (dabartinis_p->cr3_virt), "r" (PUSL_LENT) : "rax", "rbx");
+	Paleisti_init_demona((fd_lent + fd - 2)->klasteris);
+	asm volatile("mov %0, %%rax\n" "mov %%rax, %%cr3" : : "r" (dabartinis_p->cr3) : "rax");
+	asm volatile ("sti");
+}
 void* SisLentele[] = {
 	sisskaityti,
 	sisrasyti,
@@ -107,10 +116,11 @@ void* SisLentele[] = {
 	sisuzdaryti,
 	cyp,
 	poll,
-	skip
+	skip,
+	paleisti
 };
 
-static uint64_t SisLentDyd = 3;
+static uint64_t SisLentDyd = 8;
 
 uint64_t vykdyti_si(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t r10, uint64_t r8, uint64_t r9)
 {

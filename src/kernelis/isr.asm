@@ -114,8 +114,7 @@ puslapiavimo_klaida:
 		mov rsi, 0
 		call print
 		popall
-		sti
-		iretq
+		jmp $
 
 %endmacro
 

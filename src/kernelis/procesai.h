@@ -4,6 +4,7 @@ typedef struct procesas procesas;
 
 extern procesas* dabartinis_p;
 extern uint64_t extra_reg;
+extern int procesu_sk;
 
 struct procesas {
     int PID;
@@ -12,6 +13,8 @@ struct procesas {
     void* kst;
     void* cr3;
    	procesas* kitas_proc;
+   	void* nst;
+   	void* cr3_virt;
 }__attribute__((packed));
 void Inicijuoti_procesus();
 void Paleisti_init_demona(uint16_t fptr);

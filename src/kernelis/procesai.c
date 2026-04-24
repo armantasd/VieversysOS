@@ -9,12 +9,13 @@
 
 static vektorius* procesai;
 static int veikiantis_procesas = 0;
-static int procesu_sk = 0;
+int procesu_sk = 0;
 void mmap(p_lentele* pml4, uint64_t virt, void* fiz, unsigned int puslapiu_sk, uint8_t veliavos);
 uint64_t Surasti_fiz(uint64_t virt);
 
 procesas* dabartinis_p;
 uint64_t extra_reg;
+procesas* proc;
 
 void Inicijuoti_procesus()
 {
@@ -23,9 +24,18 @@ void Inicijuoti_procesus()
 void Paleisti_init_demona(uint16_t fptr)
 {
     procesas initd;
-    initd.PID = 1;
-    initd.PPID = 0;
-    initd.busena = 0;
+    if(procesu_sk == 0)
+    {
+    	initd.PID = 1;
+    	initd.PPID = 0;
+    	initd.busena = 0;
+    }
+    else
+    {
+    	initd.PID = procesu_sk;
+    	initd.PPID = dabartinis_p->PID;
+    	initd.busena = 0;
+    }
     elf_headeris elfh;
     skaityti(&elfh, sizeof(elf_headeris), 0, fptr);
    	segmentas* segmentai = malloc(elfh.segm_dyd * elfh.segm_sk);
@@ -75,28 +85,55 @@ void Paleisti_init_demona(uint16_t fptr)
    	mmap(atmintis + 4096, paskutinis_add, fiz, 5, 7);
    	paskutinis_add += 4096 * 4;
    	initd.kst = (void*)((uint64_t)0xff << 39);
+   	initd.cr3_virt = (void*)((uint64_t)0xff << 39) + 4096;
     fiz = (void*)Surasti_fiz((uint64_t)atmintis);
    	mmap(atmintis + 4096, (uint64_t)initd.kst, fiz, 2, 3);
    	p_lentele* puslapiu_lent = atmintis + 4096;
     puslapiu_lent->irasas[511] = *((uint64_t*)PUSL_LENT + 511);
     veikiantis_procesas = procesu_sk;
-   	procesu_sk += 1;
-   	initd.kst += 4096 + 8;
+    initd.kst += 4096 - 8;
    	tss_ptr->rsp0 = (uint64_t)initd.kst;
    	initd.cr3 = fiz + 4096;
+   	if(procesu_sk != 0)
+   	{
+   		initd.kst -= 0x98;
+   	}
    	push_back(procesai, &initd);
-   	procesas* proc = ((procesas*)procesai->reiksmes + veikiantis_procesas);
-   	proc->kitas_proc = (procesas*)procesai->reiksmes + ((veikiantis_procesas + 1) % procesu_sk);
+   	if(procesu_sk == 0)
+   	{
+   		proc = (procesas*)procesai->reiksmes;
+   		proc->kitas_proc = proc;
+   	}
+   	else
+   	{
+   		proc = ((procesas*)procesai->reiksmes) + procesai->elementu_sk - 1;
+   		proc->kitas_proc = (procesas*)procesai->reiksmes;
+   		procesas* praitas_proc = ((procesas*)procesai->reiksmes) + procesai->elementu_sk - 2;
+   		praitas_proc->kitas_proc = proc;
+   	}
 	atlaisvinti_vkt(Load_segm);
-   	dabartinis_p = proc;
-   	asm volatile ("cli");
-	Inicijuoti_Laikrodi(100);
-   	asm volatile ("mov %0, %%cr3" : : "r" (initd.cr3) : "rax");
-  	asm volatile ("push $0x1b\n" "push %0" : : "r" (paskutinis_add) : "rax");
-  	asm volatile ("push $0x202\n" "push $0x23\n" "push %0" : : "r" (elfh.pradz) : "rax");
-	asm volatile ("mov $0, %rbp\n");
-  	asm volatile ("iretq");
-   	for(;;);
+	if(procesu_sk == 0)
+	{
+		procesu_sk += 1;
+   		dabartinis_p = proc;
+   		asm volatile ("cli");
+		Inicijuoti_Laikrodi(100);
+   		asm volatile ("mov %0, %%cr3" : : "r" (initd.cr3) : "rax");
+  		asm volatile ("push $0x1b\n" "push %0" : : "r" (paskutinis_add) : "rax");
+  		asm volatile ("push $0x202\n" "push $0x23\n" "push %0" : : "r" (elfh.pradz) : "rax");
+		asm volatile ("mov $0, %rbp\n");
+  		asm volatile ("iretq");
+	}
+   	else
+   	{
+   		procesu_sk += 1;
+   		uint64_t* riet = atmintis + 4056;
+   		riet[0] = (uint64_t)elfh.pradz;
+   		riet[1] = 0x23;
+   		riet[2] = 0x202;
+   		riet[3] = paskutinis_add;
+   		riet[4] = 0x1b;
+   	}
 }
 
 void mmap(p_lentele* pml4, uint64_t virt, void* fiz, unsigned int puslapiu_sk, uint8_t veliavos)
@@ -107,22 +144,22 @@ void mmap(p_lentele* pml4, uint64_t virt, void* fiz, unsigned int puslapiu_sk, u
 		int pdpt_ind = (virt >> 30 & 0b111111111) + i / (512 * 512) % 512;
 		int pd_ind = (virt >> 21 & 0b111111111) + i / 512 % 512;
 		int pt_ind = (virt >> 12 & 0b111111111) + i % 512;
-		p_lentele* pdpt = (p_lentele*) (pml4->irasas[pml4_ind] - 7);
-		if ((void*) pdpt + 7 == 0)
+		p_lentele* pdpt = (p_lentele*) (pml4->irasas[pml4_ind] & (~0xfff));
+		if (pdpt == 0)
 		{
 			pdpt = palloc();
 			pml4->irasas[pml4_ind] = (uint64_t) pdpt + 7;
 		}
 		pdpt = (p_lentele*)((void*)pdpt + PHEAP_PRAD - 0x400000); // vertimas i virtualia, kad galetume skaityt.
-		p_lentele* pd = (p_lentele*) (pdpt->irasas[pdpt_ind] - 7);
-		if ((void*) pd + 7 == 0)
+		p_lentele* pd = (p_lentele*) (pdpt->irasas[pdpt_ind] & (~0xfff));
+		if (pd == 0)
 		{
 			pd = palloc();
 			pdpt->irasas[pdpt_ind] = (uint64_t) pd + 7;
 		}
 		pd = (p_lentele*)((void*)pd + PHEAP_PRAD - 0x400000);
-		p_lentele* pt = (p_lentele*) (pd->irasas[pd_ind] - 7);
-		if ((void*) pt + 7 == 0)
+		p_lentele* pt = (p_lentele*) (pd->irasas[pd_ind] & (~0xfff));
+		if (pt == 0)
 		{
 			pt = palloc();
 			pd->irasas[pd_ind] = (uint64_t) pt + 7;
@@ -134,10 +171,10 @@ void mmap(p_lentele* pml4, uint64_t virt, void* fiz, unsigned int puslapiu_sk, u
 uint64_t Surasti_fiz(uint64_t virt)
 {
 	p_lentele* pml4 = (p_lentele*)PUSL_LENT;
-	int pml4_ind = virt >> 39 & 0b111111111;
-	int pdpt_ind = virt >> 30 & 0b111111111;
-	int pd_ind = virt >> 21 & 0b111111111;
-	int pt_ind = virt >> 12 & 0b111111111;
+	int pml4_ind = (virt >> 39) & 0b111111111;
+	int pdpt_ind = (virt >> 30) & 0b111111111;
+	int pd_ind = (virt >> 21) & 0b111111111;
+	int pt_ind = (virt >> 12) & 0b111111111;
 	p_lentele* pdpt = (p_lentele*) (pml4->irasas[pml4_ind] & (~0xfff));
 	pdpt = (p_lentele*)((void*)pdpt + PHEAP_PRAD - 0x400000); // vertimas i virtualia, kad galetume skaityt.
 	p_lentele* pd = (p_lentele*) (pdpt->irasas[pdpt_ind] & (~0xfff));
