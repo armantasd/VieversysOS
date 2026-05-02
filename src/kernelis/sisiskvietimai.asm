@@ -74,6 +74,7 @@ sisiskv:
 	mov rcx, r10
 	call vykdyti_si
 	cli
+	mov [extra_reg], rax
 	popall
 	mov rax, [tss_ptr]
 	mov [rax + 4], rsp

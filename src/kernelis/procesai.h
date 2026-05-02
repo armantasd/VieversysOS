@@ -1,4 +1,5 @@
 #include<stdint.h>
+#include<stdbool.h>
 
 typedef struct procesas procesas;
 
@@ -15,10 +16,13 @@ struct procesas {
    	procesas* kitas_proc;
    	void* nst;
    	void* cr3_virt;
+   	void* atmintis;
 }__attribute__((packed));
 void Inicijuoti_procesus();
 void Paleisti_init_demona(uint16_t fptr);
 void Ant_laiko_pabaigos();
+void nuzudyti_proc(procesas* proc);
+bool ar_gyvas_proc(int pid);
 
 typedef struct {
 	char indent[16];

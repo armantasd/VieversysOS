@@ -8,10 +8,10 @@
 #include"laikrodis.h"
 
 static vektorius* procesai;
-static int veikiantis_procesas = 0;
 int procesu_sk = 0;
 void mmap(p_lentele* pml4, uint64_t virt, void* fiz, unsigned int puslapiu_sk, uint8_t veliavos);
 uint64_t Surasti_fiz(uint64_t virt);
+void demap(p_lentele* lent, int gylis);
 
 procesas* dabartinis_p;
 uint64_t extra_reg;
@@ -32,7 +32,7 @@ void Paleisti_init_demona(uint16_t fptr)
     }
     else
     {
-    	initd.PID = procesu_sk;
+    	initd.PID = procesu_sk + 1;
     	initd.PPID = dabartinis_p->PID;
     	initd.busena = 0;
     }
@@ -66,6 +66,7 @@ void Paleisti_init_demona(uint16_t fptr)
    	}
    	dydis = paskutinis_add - pirmas_add;
    	void* atmintis = valloc(2 + (dydis / 4096 + 1) + 5);
+   	initd.atmintis = atmintis;
    	void* fiz = (void*)Surasti_fiz((uint64_t)atmintis + 4096 * 2);
    	void* virt_fiz = atmintis + 4096 * 2;
    	for(int i = 0; i < Load_segm->elementu_sk; i++)
@@ -82,7 +83,7 @@ void Paleisti_init_demona(uint16_t fptr)
    		virt_fiz += puslapiu_sk * 4096;
    	}
    	paskutinis_add &= (~0xfff);
-   	mmap(atmintis + 4096, paskutinis_add, fiz, 5, 7);
+   	mmap(atmintis + 4096, paskutinis_add + 4096, fiz, 5, 7);
    	paskutinis_add += 4096 * 4;
    	initd.kst = (void*)((uint64_t)0xff << 39);
    	initd.cr3_virt = (void*)((uint64_t)0xff << 39) + 4096;
@@ -90,7 +91,6 @@ void Paleisti_init_demona(uint16_t fptr)
    	mmap(atmintis + 4096, (uint64_t)initd.kst, fiz, 2, 3);
    	p_lentele* puslapiu_lent = atmintis + 4096;
     puslapiu_lent->irasas[511] = *((uint64_t*)PUSL_LENT + 511);
-    veikiantis_procesas = procesu_sk;
     initd.kst += 4096 - 8;
    	tss_ptr->rsp0 = (uint64_t)initd.kst;
    	initd.cr3 = fiz + 4096;
@@ -182,4 +182,58 @@ uint64_t Surasti_fiz(uint64_t virt)
 	p_lentele* pt = (p_lentele*) (pd->irasas[pd_ind] & (~0xfff));
 	pt = (p_lentele*)((void*)pt + PHEAP_PRAD - 0x400000);
 	return (pt->irasas[pt_ind] & (~0xfff));
+}
+
+void nuzudyti_proc(procesas* proc)
+{
+	procesas* proc_ptr = procesai->reiksmes;
+	for(int i = 0; i < procesai->elementu_sk; i++)
+	{
+		if(proc_ptr[i].kitas_proc == proc)
+		{
+			proc_ptr[i].kitas_proc = &proc_ptr[(i + 2) % procesai->elementu_sk];
+		}
+	}
+	p_lentele* pml4 = proc->cr3_virt;
+	for(int i = 0; i < 200; i++)
+	{
+		if((pml4->irasas[i] & 0x1) == 1)
+		{
+			void* kita_lent = (void*)(pml4->irasas[i] & (~0xfff));
+			demap((p_lentele*)(kita_lent + PHEAP_PRAD - 0x400000), 2);
+		}
+	}
+	vfree(proc->atmintis);
+}
+void demap(p_lentele* lent, int gylis)
+{
+	if (gylis == 0)
+	{
+		pfree(lent);
+	}
+	else
+	{
+		for(int i = 0; i < 512; i++)
+		{
+			if((lent->irasas[i] & 0x1) == 1)
+			{
+				void* kita_lent = (void*)(lent->irasas[i] & (~0xfff));
+				demap((p_lentele*)(kita_lent + PHEAP_PRAD - 0x400000), gylis - 1);
+			}
+		}
+	}
+}
+bool ar_gyvas_proc(int pid)
+{
+	if(pid == 1)
+	{
+		return true;
+	}
+	procesas* proc_ptr = procesai->reiksmes;
+	pid--;
+	if(proc_ptr[pid - 1].kitas_proc == &proc_ptr[pid])
+	{
+		return true;
+	}
+	return false;
 }

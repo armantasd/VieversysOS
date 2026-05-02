@@ -43,7 +43,7 @@ void kernel_main()
 	uint16_t fptr = atidaryti("/VINITD.ELF");
 	Inicijuoti_procesus();
 	Inicijuoti_sistemos_iskvietimus();
-	print("Paleidziamas vievinitd");
+	print("Paleidziamas vievinitd\n");
 	Paleisti_init_demona(fptr);
 	for(;;);
 	return;
