@@ -26,6 +26,7 @@ $(BUILD_DIR)/main_flash.img: bootloaderis kernelis
 	gcc -static -nostdlib -fno-stack-protector src/vievinitd/vievinitd.c src/vievinitd/viev.o -o vievroot/vievinitd
 	mcopy -i $(BUILD_DIR)/main_flash.img vievroot/vievinitd "::vinitd.elf"
 	mcopy -i $(BUILD_DIR)/main_flash.img vievroot/programa "::prog.elf"
+	mcopy -i $(BUILD_DIR)/main_flash.img vievroot/failas.txt "::failas.txt"
 
 bootloaderis: $(BUILD_DIR)/bootloaderis.bin
 

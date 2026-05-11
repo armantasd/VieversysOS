@@ -112,9 +112,12 @@ void Klaviaturos_pertraukymas()
 					{
 						break;
 					}
-					print("%r", raide);
 					if (raide == '\b')
 					{
+						if(stdivestis->elementu_sk == 0)
+						{
+							break;
+						}
 						*(char*)(stdivestis->reiksmes + stdivestis->elementu_sk - 1) = '\0';
 						stdivestis->elementu_sk -= 1;
 					}
@@ -122,6 +125,7 @@ void Klaviaturos_pertraukymas()
 					{
 						push_back(stdivestis, &raide);
 					}
+					print("%r", raide);
 				}
 			}
 	}

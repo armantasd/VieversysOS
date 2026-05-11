@@ -44,12 +44,23 @@ void sisrasyti(uint64_t fd, char* buf, uint64_t dydis)
 void sisskaityti(uint64_t fd, char* buf, uint64_t dydis)
 {
 	if(fd == 0)
-	{
-		char raide = *(char*)(stdivestis->reiksmes + stdivestis->elementu_sk - 1);
+	{	
+		char raide = '\0';
+		if(stdivestis->elementu_sk != 0)
+		{
+			raide = *(char*)(stdivestis->reiksmes + stdivestis->elementu_sk - 1);
+		}
 		while(raide != '\n')
 		{
 			skip();
-			raide = *(char*)(stdivestis->reiksmes + stdivestis->elementu_sk - 1);
+			if(stdivestis->elementu_sk != 0)
+			{
+				raide = *(char*)(stdivestis->reiksmes + stdivestis->elementu_sk - 1);
+			}
+			else
+			{
+				continue;
+			}
 		}
 		bool terminuotas = false;
 		for(uint64_t i = 0; i < dydis; i++)
@@ -139,7 +150,7 @@ void* SisLentele[] = {
 	ar_gyvas
 };
 
-static uint64_t SisLentDyd = 10;
+const uint64_t SisLentDyd = 10;
 
 uint64_t vykdyti_si(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t r10, uint64_t r8, uint64_t r9)
 {

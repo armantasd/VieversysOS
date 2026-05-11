@@ -3,5 +3,5 @@
 void _start()
 {
 	cyp();
-	for(;;);
+	iseiti();
 }
