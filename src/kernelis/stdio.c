@@ -5,7 +5,8 @@
 #include"vektoriai.h"
 
 static int VGA_buffer_indeksas;
-vektorius* stdivestis;
+char* stdivestis;
+int stdini;
 
 void Prideti_eilute();
 inline void Perkrauti_zymekli(int zymeklio_pos);
@@ -113,6 +114,12 @@ void print(char* tekstas, ...)
 						}
 						int Stulpelis = VGA_buffer_indeksas % 80;
 						VGA_buffer_indeksas += 80 - Stulpelis;
+						Perkrauti_zymekli(VGA_buffer_indeksas);
+						i += 2;
+					}
+					else if(raide == 1)
+					{
+						VGA_buffer_indeksas = 0;
 						Perkrauti_zymekli(VGA_buffer_indeksas);
 						i += 2;
 					}

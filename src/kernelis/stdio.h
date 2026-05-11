@@ -3,7 +3,8 @@
 #include<stdarg.h>
 #include"vektoriai.h"
 
-extern vektorius* stdivestis;
+extern char* stdivestis;
+extern int stdini;
 
 void prtchr(char c, int index);
 vektorius* itoa(int a);

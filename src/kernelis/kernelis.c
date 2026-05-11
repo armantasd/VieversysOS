@@ -31,7 +31,8 @@ void kernel_main()
 	InicijuotiIDTirasus(pertr_irasai);
 	pertraukimai.limitas = sizeof(struct pertr_irasas) * 256 - 1;
 	pertraukimai.adresas = (uint64_t) pertr_irasai;
-	stdivestis = Vektorius(1);
+	stdivestis = malloc(40);
+	stdini = 0;
 	asm volatile ("lidt %0\n" "sti\n" : : "m" (pertraukimai) : "memory");
 	print("Pertraukymai paruosti\n");
 	Tr_sk_init();
@@ -102,8 +103,13 @@ void Klaviaturos_pertraukymas()
 					{
 						break;
 					}
+					if(stdini == 39)
+					{
+						break;
+					}
+					stdivestis[stdini] = raide;
+					stdini++;
 					print("%r", raide);
-					push_back(stdivestis, &raide);
 				}
 				else
 				{
@@ -114,16 +120,21 @@ void Klaviaturos_pertraukymas()
 					}
 					if (raide == '\b')
 					{
-						if(stdivestis->elementu_sk == 0)
+						if(stdini == 0)
 						{
 							break;
 						}
-						*(char*)(stdivestis->reiksmes + stdivestis->elementu_sk - 1) = '\0';
-						stdivestis->elementu_sk -= 1;
+						stdivestis[stdini - 1] = '\0';
+						stdini--;
 					}
 					else
 					{
-						push_back(stdivestis, &raide);
+						if(stdini == 39)
+						{
+							break;
+						}
+						stdivestis[stdini] = raide;
+						stdini++;
 					}
 					print("%r", raide);
 				}

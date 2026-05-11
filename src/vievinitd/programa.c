@@ -2,6 +2,6 @@
 
 void _start()
 {
-	cyp();
+	rasyti(1, "Laba diena\n", 10);
 	iseiti();
 }

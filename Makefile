@@ -24,6 +24,7 @@ $(BUILD_DIR)/main_flash.img: bootloaderis kernelis
 	mcopy -i $(BUILD_DIR)/main_flash.img $(BUILD_DIR)/kernelis.bin "::kernelis.bin"
 	gcc -c -fno-stack-protector src/vievinitd/viev.c -o src/vievinitd/viev.o
 	gcc -static -nostdlib -fno-stack-protector src/vievinitd/vievinitd.c src/vievinitd/viev.o -o vievroot/vievinitd
+	gcc -static -nostdlib -fno-stack-protector src/vievinitd/programa.c src/vievinitd/viev.o -o vievroot/programa
 	mcopy -i $(BUILD_DIR)/main_flash.img vievroot/vievinitd "::vinitd.elf"
 	mcopy -i $(BUILD_DIR)/main_flash.img vievroot/programa "::prog.elf"
 	mcopy -i $(BUILD_DIR)/main_flash.img vievroot/failas.txt "::failas.txt"

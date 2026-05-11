@@ -14,7 +14,7 @@ void uzdaryti(uint64_t fd)
 uint64_t paleisti(uint64_t prog_fd)
 {
 	uint64_t pid;
-	asm volatile("mov $7, %%rax\n" "mov %0, %%rdi\n" "syscall\n" "mov %%rax, %1" : "=r" (pid) : "r" (prog_fd) : "rax", "rdi");
+	asm volatile("mov $6, %%rax\n" "mov %0, %%rdi\n" "syscall\n" "mov %%rax, %1" : "=r" (pid) : "r" (prog_fd) : "rax", "rdi");
 	return pid;
 }
 void skaityti(uint64_t fd, char* buf, uint64_t dydis)
@@ -27,7 +27,7 @@ void rasyti(uint64_t fd, char* buf, uint64_t dydis)
 }
 void palaukti()
 {
-	asm volatile("mov $6, %rax\n" "syscall");
+	asm volatile("mov $5, %rax\n" "syscall");
 }
 void cyp()
 {
@@ -35,11 +35,11 @@ void cyp()
 }
 void iseiti()
 {
-	asm volatile("mov $8, %rax\n" "syscall");
+	asm volatile("mov $7, %rax\n" "syscall");
 }
 bool ar_gyvas(int pid)
 {
 	uint64_t rez;
-	asm volatile("mov $9, %%rax\n" "mov %0, %%rdi\n" "syscall\n" "mov %%rax, %1" : "=r" (rez) : "r" ((uint64_t)pid) : "rax", "rdi");
+	asm volatile("mov $8, %%rax\n" "mov %0, %%rdi\n" "syscall\n" "mov %%rax, %1" : "=r" (rez) : "r" ((uint64_t)pid) : "rax", "rdi");
 	return (bool)rez;
 }

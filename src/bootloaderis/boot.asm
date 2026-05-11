@@ -128,7 +128,7 @@ main:
 
 	mov ax, 0x4000
 	mov es, ax
-	mov bx, 5
+	mov bx, 4
 	mov cx, 1
 .loop:
 	cmp bx, 0
@@ -230,4 +230,4 @@ dw 0AA55h
 FAT_tables equ 0x7e00 ; 18 sectors for FAT table
 root_dir equ 0xa200 ; 14 sectors for root dir entries
 kernel equ 0xb000 ; kernel
-ramdisk equ 0x10000
+ramdisk equ 0x40000
